@@ -16,61 +16,90 @@ Actor {
 		if( Animatron.osc.isNil ) { Animatron.boot };
 		this.osc = Animatron.osc;
 		this.osc.sendMsg("/create", name, animation);
-		this.pdef = Pdef(key, Pbind(\amp, 0, \finish, {|e| e.keysValuesDo{ |k,v|
-			v.debug(k);
-			// topEnvironment[key].perform(k, v);
-			// topEnvironment[key].osc.sendMsg().debug(key);
-		} }));
+		this.pdef = Pdef(key, Pbind(\amp, 0, \finish, {|e|
+			e.keysValuesDo{ |k,val|
+				var cmd = k.asString;
+				if( (cmd == "amp") || (cmd == "dur") || (cmd == "server") || (cmd == "finish") ) {
+					// cmd.debug("skip");
+					nil;
+				} {
+					cmd.findRegexp("[A-Z]").do{|regex|
+						cmd = cmd.replace(regex[1], "/"++regex[1].toLower);
+					};
+					cmd.replace("_", "/");
+					// "/% % %".format(cmd, this.name, val).debug;
+					if( val.isKindOf(Array) ) {
+						topEnvironment[key].osc.sendMsg("/"++(cmd.asString), this.name, *val);
+					}{
+						topEnvironment[key].osc.sendMsg("/"++(cmd.asString), this.name, val);
+					}
+				}
+			}
+		}));
+		this.pdef.play;
 	}
 
-	doesNotUnderstand { | selector ...args |
-		// var str = selector.asString;
-		// parent
-		// var responds = this.class.findRespondingMethodFor(selector);
-		// responds.debug(this.class);
+	prAddPbindParam { | param, value |
+		var pairs = this.pdef.source.patternpairs;
+		value.debug(param);
+		pairs = pairs.asDict;
+		pairs[param] = value;
+		pairs = pairs.asPairs;
+		this.source = Pbind(*pairs);
+	}
 
-		// str.findRegexp("[A-Z]").do{|regex|
-		// 	str = str.replace(regex[1], "/"++regex[1].toLower);
-		// };
-		// selector.debug("not understood");
-		// str.debug("sending");
-		// this.osc.sendMsg("/"++str, name, *args);
-		var pairs = this.pdef.soruce.patternpairs.asDict;
-		pairs[selector] = args;
-		// this.pdef.source = Pbind(*pairs.asPairs);
+	doesNotUnderstand { | selector, args |
+		this.pdef.perform(selector, args);
+		^this;
 	}
 
 	a { | ...args | this.anim(*args) }
-
-	bla { | args |
-		Pdef(name.asSymbol, Pbind(\amp, 0, \angle, args, \finish, {
-			currentEnvironment.keysValuesDo{|k,v|
-				this.osc.sendMsg("/"++k.asString, name, v);
-			}}
-		)).play
+	// n { | ...args | this.name = args }
+	palette { | color |
+		color.debug;
+		this.pdef.perform(color, this.name);
 	}
+
+	size { | args | this.prAddPbindParam(\size, args) }
+	parent { | args | this.prAddPbindParam(\parent, args) }
 
 }
 
 Animatron {
 	classvar <>osc;
 
-	*boot { | addr = "localhost", port = 56101 |
+	*new { | addr = "localhost", port = 56101 |
 		this.osc = NetAddr(addr, port);
+		this.prReplyListener;
 		^super.new;
 	}
 
+	*boot { | addr = "localhost", port = 56101 |
+		// "animatron".unixCmd;
+		this.osc = NetAddr(addr, port);
+		this.prReplyListener;
+		^super.new;
+	}
+
+	*prReplyListener {
+		OSCdef(\status, { arg args, time, srcAddr, port; args[1..].first.postln; }, "/status/reply");
+		OSCdef(\error, { arg args, time, srcAddr, port; args[1..].first.postln; }, "/error/reply");
+	}
+
+	*cmd { | cmd ...args| Animatron.osc.sendMsg(cmd, *args) }
+	cmd { | cmd ...args| Animatron.osc.sendMsg(cmd, *args) }
+
 	post { | ...args| this.osc.sendMsg("/post", *args) }
 
-	doesNotUnderstand { | selector ...args |
+	doesNotUnderstand { | selector, args |
 		var str = selector.asString;
 
-		str.findRegexp("[A-Z]").do{|regex|
-			str = str.replace(regex[1], "/"++regex[1].toLower);
-		};
+		// str.findRegexp("[A-Z]").do{|regex|
+		// 	str = str.replace(regex[1], "/"++regex[1].toLower);
+		// };
 
-		selector.debug("not understood");
-		str.debug("sending");
+		// selector.debug("not understood");
+		// str.debug("sending");
 		this.osc.sendMsg("/"++str, *args);
 	}
 }
