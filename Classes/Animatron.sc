@@ -19,8 +19,8 @@ Actor {
 	}
 
 	doesNotUnderstand { | selector, args |
-		// this.osc.sendMsg("/"++selector+args.join(" "));
-		this.cmd("/"++selector + this.name + args)
+		if( args.isArray ) { args = args.join(" ") };
+		this.cmd("/"++selector + this.name + args);
 	}
 
 	a { | anim | this.cmd("/anim" + this.name + anim) }
@@ -32,7 +32,6 @@ Actor {
 	cmd { |...args|
 		if (args.notEmpty) {
 			var arr = args[0].separateBySpaces;
-			arr.debug;
 			if (arr.notEmpty) {
 				arr = arr ++ args[1..];
 				this.osc.sendMsg(*arr);
@@ -41,9 +40,17 @@ Actor {
 		};
 	}
 
+	//
+	color { | rgb | this.cmd("/color" + this.name + rgb[0] + rgb[1] + rgb[2]) }
+	red { | r | this.cmd("/color/r" + this.name + r) }
+	green { | g | this.cmd("/color/g" + this.name + g) }
+	blue { | b | this.cmd("/color/b" + this.name + b) }
+	r { | r | this.red(r) }
+	g { | g | this.green(g) }
+	b { | b | this.blue(b) }
+
 	// overrides
 	size { | args | this.cmd("/size" + this.name + args) }
-
 }
 
 Animatron {
