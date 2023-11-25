@@ -60,8 +60,18 @@ Actor {
 		this.pdef.perform(color, this.name);
 	}
 
+	// cmd { |cmd|
+	// 	this.pdef.perform(\cmd, cmd);
+	// 	// ^this;
+	// }
+
+	loop { | args | this.osc.sendMsg(["/noloop","/loop"][args?1], this.name) }
+	noloop { | args | ^Pfunc{this.osc.sendMsg("/noloop", this.name)} }
+
+	// -------------- overrides ---------------------------
 	size { | args | this.prAddPbindParam(\size, args) }
 	parent { | args | this.prAddPbindParam(\parent, args) }
+	rotate { | args | this.prAddPbindParam(\rotate, args) }
 
 }
 
