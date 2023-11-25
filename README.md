@@ -9,29 +9,28 @@ a = Animatron.boot;
 a.cmd("/list/assets");
 // simpler version without using an instance
 "/list/assets".cmd;
-// load a couple of movies
-"/load solid".cmd; // for background
-"/load kazoo".cmd; // something else
+"/load solid".cmd;
+"/load kazoo".cmd;
 
+// create a red backround
+~bg a: \solid r: 0.5 behind: "*"
 // create an actor named 'lola' using the animation 'kazoo'
-~lola a: \kazoo;
+~lola a: \kazoo
 // change the size
-~lola angle: 360.rand;
+~lola size: 0.5 color: ([1.0,0.5,0]*1.0)
 // change more than one attribute at a time
-~lola angle: 360.rand size: 90.rand;
+~lola angle: 360.rand size: 90.rand
 
-// create a red background
-~bg a: \solid r: 0.5 behind: "*";
-// set the 3 color values
-~bg color: [1,0,0];
+// change the bg color
+~bg color: {0.5.rand}.dup(3)
 
 (
 Tdef(\a, {
     inf.do{|i|
-        "/color bl* % % %".cmd(1.1, 1.0.rand, 1.0.rand);
-        "/angle bl* %".cmd(360.rand);
-        "/position/y bla %".cmd(1.0.rand);
-        "/position/x bla %".cmd(1.0.rand);
+        "/color lola % % %".cmd(1.1, 1.0.rand, 1.0.rand);
+        "/angle lola %".cmd(360.rand);
+        "/position/y lola %".cmd(1.0.rand);
+        "/position/x lola %".cmd(1.0.rand);
         0.5.wait;
     };
 }).play
