@@ -1,6 +1,6 @@
 + Nil {
-	anim { |animation|
-		var code = thisProcess.interpreter.cmdLine.split($ )[0];
+	anim { |animation, actor=nil|
+		var code = actor ? thisProcess.interpreter.cmdLine.split($ )[0];
 		var name = code.findRegexp("~[a-zA-Z0-9]+")[0][1].replace("~", "").asSymbol;
 		// Pdef(connection, Pbind(\type, \ziva, \s, snd, \scale, Pdefn(\scale), \root, Pdefn(\root)));
 		// Pdef(connection).play;
