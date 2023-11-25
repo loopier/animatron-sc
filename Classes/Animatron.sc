@@ -16,62 +16,33 @@ Actor {
 		if( Animatron.osc.isNil ) { Animatron.boot };
 		this.osc = Animatron.osc;
 		this.osc.sendMsg("/create", name, animation);
-		this.pdef = Pdef(key, Pbind(\amp, 0, \finish, {|e|
-			e.keysValuesDo{ |k,val|
-				var cmd = k.asString;
-				if( (cmd == "amp") || (cmd == "dur") || (cmd == "server") || (cmd == "finish") ) {
-					// cmd.debug("skip");
-					nil;
-				} {
-					cmd.findRegexp("[A-Z]").do{|regex|
-						cmd = cmd.replace(regex[1], "/"++regex[1].toLower);
-					};
-					cmd.replace("_", "/");
-					// "/% % %".format(cmd, this.name, val).debug;
-					if( val.isKindOf(Array) ) {
-						topEnvironment[key].osc.sendMsg("/"++(cmd.asString), this.name, *val);
-					}{
-						topEnvironment[key].osc.sendMsg("/"++(cmd.asString), this.name, val);
-					}
-				}
-			}
-		}));
-		this.pdef.play;
-	}
-
-	prAddPbindParam { | param, value |
-		var pairs = this.pdef.source.patternpairs;
-		value.debug(param);
-		pairs = pairs.asDict;
-		pairs[param] = value;
-		pairs = pairs.asPairs;
-		this.source = Pbind(*pairs);
 	}
 
 	doesNotUnderstand { | selector, args |
-		this.pdef.perform(selector, args);
-		^this;
+		// this.osc.sendMsg("/"++selector+args.join(" "));
+		this.cmd("/"++selector + this.name + args)
 	}
 
-	a { | ...args | this.anim(*args) }
-	// n { | ...args | this.name = args }
+	a { | anim | this.cmd("/anim" + this.name + anim) }
+
 	palette { | color |
 		color.debug;
-		this.pdef.perform(color, this.name);
 	}
 
-	// cmd { |cmd|
-	// 	this.pdef.perform(\cmd, cmd);
-	// 	// ^this;
-	// }
+	cmd { |...args|
+		if (args.notEmpty) {
+			var arr = args[0].separateBySpaces;
+			arr.debug;
+			if (arr.notEmpty) {
+				arr = arr ++ args[1..];
+				this.osc.sendMsg(*arr);
+				arr
+			};
+		};
+	}
 
-	loop { | args | this.osc.sendMsg(["/noloop","/loop"][args?1], this.name) }
-	noloop { | args | ^Pfunc{this.osc.sendMsg("/noloop", this.name)} }
-
-	// -------------- overrides ---------------------------
-	size { | args | this.prAddPbindParam(\size, args) }
-	parent { | args | this.prAddPbindParam(\parent, args) }
-	rotate { | args | this.prAddPbindParam(\rotate, args) }
+	// overrides
+	size { | args | this.cmd("/size" + this.name + args) }
 
 }
 
