@@ -70,8 +70,23 @@ Animatron {
 	}
 
 	*prReplyListener {
-		OSCdef(\status, { arg args, time, srcAddr, port; args[1..].first.postln; }, "/status/reply");
-		OSCdef(\error, { arg args, time, srcAddr, port; args[1..].first.postln; }, "/error/reply");
+		// OSCdef(\status, { arg args, time, srcAddr, port; args[1..].first.postln; }, "/status/reply");
+		// OSCdef(\error, { arg args, time, srcAddr, port; args[1..].first.postln; }, "/error/reply");
+		OSCdef(\listActorsReply, { arg msg;
+			"Actors: %".format(msg[1..]).postln;
+		}, "/list/actors/reply");
+		OSCdef(\listAnimsReply, { arg msg;
+			"Available animations:\n\t%".format(join(msg[1..], "\n\t")).postln;
+		}, "/list/anims/reply");
+		OSCdef(\listAssetsReply, { arg msg;
+			"Available assets:\n\t%".format(join(msg[1..], "\n\t")).postln;
+		}, "/list/assets/reply");
+		OSCdef(\errorReply, { arg msg;
+			"Error: %".format(msg[1]).postln;
+		}, "/error/reply");
+		OSCdef(\statusReply, { arg msg;
+			"Status: %".format(msg[1]).postln;
+		}, "/status/reply");
 	}
 
 	*cmd { | cmd ...args| Animatron.osc.sendMsg(cmd, *args) }
