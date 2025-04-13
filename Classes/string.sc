@@ -11,15 +11,16 @@
 	}
 
 	cmd { | ...args |
-		var arr;
-		var str = this.format(*args);
-		arr = str.separateBySpaces;
-		if (arr.notEmpty) {
-			if( Animatron.osc.isNil ) {
-				"Animatron not running.".warn
-			} {
-				Animatron.osc.sendMsg(*arr);
-			};
-		};
+		Animatron.cmd(*([this]++args))
+		// var arr;
+		// var str = this.format(*args);
+		// arr = str.separateBySpaces;
+		// if (arr.notEmpty) {
+		// 	if( Animatron.osc.isNil ) {
+		// 		"Animatron not running.".warn
+		// 	} {
+		// 		Animatron.osc.sendMsg(*arr);
+		// 	};
+		// };
 	}
 }

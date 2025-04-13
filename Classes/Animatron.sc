@@ -54,19 +54,24 @@ Actor {
 }
 
 Animatron {
-	classvar <>osc;
+	var <>osc;
+	classvar <>classOsc;
 
 	*new { | addr = "localhost", port = 56101 |
-		this.osc = NetAddr(addr, port);
+		var instance = super.new;
+		instance.osc = NetAddr(addr, port);
+		this.classOsc = NetAddr(addr, port);
 		this.prReplyListener;
-		^super.new;
+		^instance;
 	}
 
 	*boot { | addr = "localhost", port = 56101 |
 		// "animatron".unixCmd;
-		this.osc = NetAddr(addr, port);
+		var instance = super.new;
+		instance.osc = NetAddr(addr, port);
+		this.classOsc = NetAddr(addr, port);
 		this.prReplyListener;
-		^super.new;
+		^instance;
 	}
 
 	*prReplyListener {
@@ -89,8 +94,25 @@ Animatron {
 		}, "/status/reply");
 	}
 
-	*cmd { | cmd ...args| Animatron.osc.sendMsg(cmd, *args) }
-	cmd { | cmd ...args| Animatron.osc.sendMsg(cmd, *args) }
+	*cmd { |...args|
+		if (args.notEmpty) {
+			var arr = args[0].format(*args[1..]).separateBySpaces;
+			this.osc.sendMsg(*arr);
+		};
+	}
+	// *cmd { |...args|
+	// 	args.debug("*cmd");
+	// 	if (args.notEmpty) {
+	// 		var arr = args[0].separateBySpaces;
+	// 		if (arr.notEmpty) {
+	// 			arr = arr ++ args[1..];
+	// 			this.osc.sendMsg(*arr).debug;
+	// 			arr
+	// 		};
+	// 	};
+	// }
+
+	cmd { | ...args| this.osc.sendMsg(args) }
 
 	post { | ...args| this.osc.sendMsg("/post", *args) }
 
