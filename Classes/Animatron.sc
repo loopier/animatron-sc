@@ -112,7 +112,12 @@ Animatron {
 	// 	};
 	// }
 
-	cmd { | ...args| this.osc.sendMsg(args) }
+	cmd { | ...args|
+		if (args.notEmpty) {
+			var arr = args[0].format(*args[1..]).separateBySpaces;
+			this.osc.sendMsg(*arr);
+		};
+	}
 
 	post { | ...args| this.osc.sendMsg("/post", *args) }
 
