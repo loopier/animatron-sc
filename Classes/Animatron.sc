@@ -95,9 +95,14 @@ Animatron {
 	}
 
 	*cmd { |...args|
+		// if (this.osc.isNil) {
+		// 	this.classOsc = NetAddr(addr, port);
+		// };
+
 		if (args.notEmpty) {
 			var arr = args[0].format(*args[1..]).separateBySpaces;
-			this.osc.sendMsg(*arr);
+			// this.osc.sendMsg(*arr);
+			this.classOsc.sendMsg(*arr);
 		};
 	}
 	// *cmd { |...args|
