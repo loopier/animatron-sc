@@ -71,6 +71,7 @@ Animatron {
 		instance.osc = NetAddr(addr, port);
 		this.classOsc = NetAddr(addr, port);
 		this.prReplyListener;
+		port.debug("Sending to Animatron through port:");
 		^instance;
 	}
 
